@@ -32,20 +32,13 @@ public class NetClass{
 							String answer = in.readUTF();
 							notifyListeners(answer);
 						}
-						else if(work_type.equals("TAKE_USERS_ONLINE")){
-							LinkedList<String> usersOnline = new LinkedList<String>();
-							int size = Integer.parseInt(in.readUTF());
-							for(int i=0; i<size; i++){
-								usersOnline.add(in.readUTF());
+						else if(work_type.equals("NEXT_PHOTO")||work_type.equals("PREV_PHOTO")){
+							int bytesSize = in.readInt();
+							byte[] bytes = new byte[bytesSize];
+							for(int i=0; i<bytesSize; i++){
+								bytes[i] = in.readByte();
 							}
-							if(size > 0){
-								notifyListeners(usersOnline);
-							}
-						}
-						else if(work_type.equals("DIALOG")){
-							final String name = in.readUTF();
-							final String message = in.readUTF();
-							notifyListeners(name, message);
+							notifyListeners(bytes, bytesSize);
 						}
 						socket.close();
 					}
@@ -81,16 +74,32 @@ public class NetClass{
 		}
 	}
 	
-	
+	//для отправки фотографий
 	public void send(String worktype, String name, byte[] bytesFigure, int bytesFigureSize){
 		try{
 			final Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
 			final DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 			out.writeUTF(worktype);
 			out.writeUTF(name);
+			out.writeInt(bytesFigureSize);
 			for(int i=0; i<bytesFigureSize; i++){
 				out.writeByte(bytesFigure[i]);
 			}
+			socket.close();
+		}
+		catch (UnknownHostException e){//реагировать не нужно
+		} 
+		catch (IOException e){
+		}
+	}
+	
+	//для отправки запроса на просмотр следующей/предыдущей фотографии
+	public void send(String worktype, String name){
+		try{
+			final Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
+			final DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+			out.writeUTF(worktype);
+			out.writeUTF(name);
 			socket.close();
 		}
 		catch (UnknownHostException e){//реагировать не нужно
@@ -128,11 +137,11 @@ public class NetClass{
 		}
 	}
 	
-	private void notifyListeners(String name, String message) {
+	private void notifyListeners(byte[] bytes, int bytesSize) {
 		synchronized (listeners){
 			int size = listeners.size();
 			for(int i=0; i<size; i++){
-				listeners.get(i).messageReceived(name, message);
+				listeners.get(i).messageReceived(bytes, bytesSize);
 			}
 		}
 	}

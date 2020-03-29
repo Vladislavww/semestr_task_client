@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
-import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -25,12 +24,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.Timer;
-import javax.swing.GroupLayout.Alignment;
 
 
 
@@ -86,12 +79,12 @@ public class MenuFrame extends JFrame {
 				sendToServer();
 			}};
 		fileMenu.add(importToServerAction);
-		/*Action exportFromServerAction = new AbstractAction("Загрузить выбранную фотографию на компьютер с сервера"){
-			public void actionPerformed(ActionEvent event){ 
-				
-			}};
-		fileMenu.add(exportFromServerAction);*/
 		figure = new JLabel();
+		Action deleteFromServerAction = new AbstractAction("Удалить выбранную фотографию с сервера"){
+			public void actionPerformed(ActionEvent event){ 
+				deleteFromServer();
+			}};
+		fileMenu.add(deleteFromServerAction);
 		Box hboxfigure = Box.createHorizontalBox();
 		hboxfigure.add(Box.createHorizontalGlue());
 		hboxfigure.add(figure);
@@ -102,13 +95,13 @@ public class MenuFrame extends JFrame {
 		JButton buttonPrevisious = new JButton("Предыдущее");
 		buttonPrevisious.addActionListener(new ActionListener() {    
 			public void actionPerformed(ActionEvent ev) {   
-				
+				takePrevPhoto();
 			}
 		});
 		JButton buttonNext = new JButton("Следующее");
 		buttonNext.addActionListener(new ActionListener() {    
 			public void actionPerformed(ActionEvent ev) {   
-				
+				takeNextPhoto();
 			}
 		});
 		buttons.add(buttonPrevisious);
@@ -129,6 +122,9 @@ public class MenuFrame extends JFrame {
 			}
 			public void messageReceived(String name, String message) {
 				//ничего
+			}
+			public void messageReceived(byte[] bytes, int bytesSize) {
+				receiveFigure(bytes, bytesSize);
 			}
 		});
 	}
@@ -171,8 +167,25 @@ public class MenuFrame extends JFrame {
 		}
 	}
 	
+	private void receiveFigure(byte[] bytes, int bytesSize){
+		bytesFigure = bytes;
+		bytesFigureSize = bytesSize;
+		figure.setIcon(new ImageIcon(bytesFigure));
+	}
 	private void sendToServer(){
 		NetManager.send("IMPORT_PHOTO", UserName, bytesFigure, bytesFigureSize);
+	}
+	
+	private void takeNextPhoto(){
+		NetManager.send("NEXT_PHOTO", UserName);
+	}
+	
+	private void takePrevPhoto(){
+		NetManager.send("PREV_PHOTO", UserName);
+	}
+	
+	private void deleteFromServer(){
+		//TODO NetManager.send("DELETE_PHOTO", UserName);
 	}
 
 }

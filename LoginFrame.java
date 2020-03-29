@@ -5,7 +5,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
-
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -107,6 +106,9 @@ public class LoginFrame extends JFrame{
 			public void messageReceived(String name, String message) {
 				//ничего
 			}
+			public void messageReceived(byte[] bytes, int bytesSize) {
+				//ничего
+			}
 		});
 	}
 	
@@ -148,6 +150,9 @@ public class LoginFrame extends JFrame{
 					//ничего
 				}
 				public void messageReceived(String name, String message) {
+					//ничего
+				}
+				public void messageReceived(byte[] bytes, int bytesSize) {
 					//ничего
 				}
 			});

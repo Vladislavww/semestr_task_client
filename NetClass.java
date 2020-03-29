@@ -94,6 +94,7 @@ public class NetClass{
 	}
 	
 	//для отправки запроса на просмотр следующей/предыдущей фотографии
+	//или удаления фотографии
 	public void send(String worktype, String name){
 		try{
 			final Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);

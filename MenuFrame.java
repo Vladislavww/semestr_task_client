@@ -185,7 +185,7 @@ public class MenuFrame extends JFrame {
 	}
 	
 	private void deleteFromServer(){
-		//TODO NetManager.send("DELETE_PHOTO", UserName);
+		NetManager.send("DELETE_PHOTO", UserName);
 	}
 
 }

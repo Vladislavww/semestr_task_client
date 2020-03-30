@@ -21,17 +21,19 @@ public class NetClass{
 				try{
 					final ServerSocket serverSocket = new ServerSocket(CLIENT_PORT);
 					while (!Thread.interrupted()){
+						//принятие ообщений от сервера
 						final Socket socket = serverSocket.accept();
 						final DataInputStream in = new DataInputStream(socket.getInputStream());
 						String work_type = in.readUTF();
-						if(work_type.equals("CHECK_IN")){
+						if(work_type.equals("CHECK_IN")){//результат авторизации
 							String answer = in.readUTF();
 							notifyListeners(answer);
 						}
-						else if(work_type.equals("NEW_USER")){
+						else if(work_type.equals("NEW_USER")){//результат создания нового пользователя
 							String answer = in.readUTF();
 							notifyListeners(answer);
 						}
+						//получение фотографий с сервера
 						else if(work_type.equals("NEXT_PHOTO")||work_type.equals("PREV_PHOTO")){
 							int bytesSize = in.readInt();
 							byte[] bytes = new byte[bytesSize];
@@ -74,8 +76,8 @@ public class NetClass{
 		}
 	}
 	
-	//для отправки фотографий
-	public void send(String worktype, String name, byte[] bytesFigure, int bytesFigureSize){
+	//функция для отправки фотографий
+	public int send(String worktype, String name, byte[] bytesFigure, int bytesFigureSize){
 		try{
 			final Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
 			final DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -86,26 +88,36 @@ public class NetClass{
 				out.writeByte(bytesFigure[i]);
 			}
 			socket.close();
+			return 0;
 		}
-		catch (UnknownHostException e){//реагировать не нужно
+		catch (UnknownHostException e){
+			e.printStackTrace();
+			return 1;
 		} 
 		catch (IOException e){
+			e.printStackTrace();
+			return 2;
 		}
 	}
 	
 	//для отправки запроса на просмотр следующей/предыдущей фотографии
 	//или удаления фотографии
-	public void send(String worktype, String name){
+	public int send(String worktype, String name){
 		try{
 			final Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
 			final DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 			out.writeUTF(worktype);
 			out.writeUTF(name);
 			socket.close();
+			return 0;
 		}
-		catch (UnknownHostException e){//реагировать не нужно
+		catch (UnknownHostException e){
+			e.printStackTrace();
+			return 1;
 		} 
 		catch (IOException e){
+			e.printStackTrace();
+			return 2;
 		}
 	}
 	
@@ -122,14 +134,6 @@ public class NetClass{
 	}
 	
 	private void notifyListeners(String message) {
-		synchronized (listeners){
-			int size = listeners.size();
-			for(int i=0; i<size; i++){
-				listeners.get(i).messageReceived(message);
-			}
-		}
-	}
-	private void notifyListeners(LinkedList<String> message) {
 		synchronized (listeners){
 			int size = listeners.size();
 			for(int i=0; i<size; i++){

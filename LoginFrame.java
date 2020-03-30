@@ -38,9 +38,9 @@ public class LoginFrame extends JFrame{
 		JLabel NewUserLabel = new JLabel("Если вы новый пользователь");
 		ResultLabel = new JLabel();
 		ResultLabel.setVisible(false);
-		textFieldUsername = new JTextField("Vlad", 30);
+		textFieldUsername = new JTextField("", 30);
 		textFieldUsername.setMaximumSize(textFieldUsername.getPreferredSize());
-		textFieldPassword = new JTextField("1234", 30);
+		textFieldPassword = new JTextField("", 30);
 		textFieldPassword.setMaximumSize(textFieldPassword.getPreferredSize());
 		final JButton enterButton = new JButton("Войти");
 		enterButton.addActionListener(new ActionListener(){
@@ -112,6 +112,8 @@ public class LoginFrame extends JFrame{
 		});
 	}
 	
+	//попытка авторизации
+	//и обработка ошибок
 	private void enter(){
 		String login = textFieldUsername.getText();
 		String password = textFieldPassword.getText();
@@ -134,6 +136,7 @@ public class LoginFrame extends JFrame{
 			}
 		}
 	}
+	
 	//функция изменеия ResultLabel в зависимости от результата ввода логина и пароля(или регистрации)
 	private void checkInResult(String text){ 
 		ResultLabel.setVisible(true);
@@ -145,9 +148,6 @@ public class LoginFrame extends JFrame{
 			NetManager.removeMessageListener(new MessageListener(){ //убираю слушатель за ненадобностью
 				public void messageReceived(String message) {
 					checkInResult(message);
-				}
-				public void messageReceived(LinkedList<String> message) {
-					//ничего
 				}
 				public void messageReceived(String name, String message) {
 					//ничего

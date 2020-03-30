@@ -3,6 +3,7 @@ package bsu.rfe_g6k2.Yackou.client;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+
 public class Main {
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable(){

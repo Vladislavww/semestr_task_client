@@ -35,6 +35,7 @@ public class MenuFrame extends JFrame {
 	private JFileChooser fileChooser = null; 
 	private String UserName;
 	private JLabel figure;
+	//данные для фотографии, отображаемой на экране
 	byte[] bytesFigure;
 	int bytesFigureSize;
 	
@@ -47,10 +48,8 @@ public class MenuFrame extends JFrame {
 		setMinimumSize(new Dimension(FRAME_MINIMUM_WIDTH, FRAME_MINIMUM_HEIGHT));
 		JMenuBar menuBar = new JMenuBar(); 
 		setJMenuBar(menuBar);
-		// Добавить пункт меню "Файл" 
 		JMenu fileMenu = new JMenu("Файл");
 		menuBar.add(fileMenu); 
-		// Создать действие по открытию файла
 		Action takePhotoAction = new AbstractAction("Выбрать фотографию"){
 			public void actionPerformed(ActionEvent event){ 
 				if (fileChooser==null){ 
@@ -61,7 +60,6 @@ public class MenuFrame extends JFrame {
 					openFigure(fileChooser.getSelectedFile());
 				}
 			}};
-		// Добавить соответствующий элемент меню 
 		fileMenu.add(takePhotoAction);
 		Action savePhotoAction = new AbstractAction("Сохранить выбранную фотографию"){
 			public void actionPerformed(ActionEvent event){ 
@@ -117,9 +115,6 @@ public class MenuFrame extends JFrame {
 			public void messageReceived(String message) {
 				//ничего
 			}
-			public void messageReceived(LinkedList<String> message){
-				//writeOnlineUsers(message);
-			}
 			public void messageReceived(String name, String message) {
 				//ничего
 			}
@@ -129,9 +124,9 @@ public class MenuFrame extends JFrame {
 		});
 	}
 	
+	//Прочитать фотографию с памяти ПК
 	private void openFigure(File selectedFile){
 		try { 
-			// Шаг 1 - Открыть поток чтения данных, связанный с входным файловым потоком 
 			DataInputStream in = new DataInputStream(new FileInputStream(selectedFile));
 			bytesFigure = new byte[in.available()];
 			bytesFigureSize = in.available();
@@ -144,18 +139,16 @@ public class MenuFrame extends JFrame {
 			figure.setIcon(new ImageIcon(bytesFigure));
 		} 
 		catch (FileNotFoundException ex){ 
-			// В случае исключительной ситуации типа "Файл не найден" показать сообщение об ошибке
 			JOptionPane.showMessageDialog(MenuFrame.this, "Указанный файл не найден", "Ошибка загрузки данных", JOptionPane.WARNING_MESSAGE);
 		} 
 		catch (IOException ex){ 
-			// В случае ошибки ввода из файлового потока показать сообщение об ошибке 
 			JOptionPane.showMessageDialog(MenuFrame.this, "Ошибка чтения фотографии", "Ошибка загрузки данных", JOptionPane.WARNING_MESSAGE);
 		}
 	}
 	
+	//Сохранить фотографию в ПК
 	private void saveFigure(File selectedFile){
 		try { 
-			// Создать новый байтовый поток вывода, направленный в указанный файл 
 			DataOutputStream out = new DataOutputStream(new FileOutputStream(selectedFile));
 			for(int i=0; i<bytesFigureSize; i++){
 				out.writeByte(bytesFigure[i]);
@@ -167,25 +160,50 @@ public class MenuFrame extends JFrame {
 		}
 	}
 	
+	//Получение фотографии с сервера
 	private void receiveFigure(byte[] bytes, int bytesSize){
 		bytesFigure = bytes;
 		bytesFigureSize = bytesSize;
 		figure.setIcon(new ImageIcon(bytesFigure));
 	}
 	private void sendToServer(){
-		NetManager.send("IMPORT_PHOTO", UserName, bytesFigure, bytesFigureSize);
+		int result = NetManager.send("IMPORT_PHOTO", UserName, bytesFigure, bytesFigureSize);
+		if(result==1){
+			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
+		}
+		else if(result==2){
+			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос", "Ошибка", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	
 	private void takeNextPhoto(){
-		NetManager.send("NEXT_PHOTO", UserName);
+		int result = NetManager.send("NEXT_PHOTO", UserName);
+		if(result==1){
+			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
+		}
+		else if(result==2){
+			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос", "Ошибка", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	
 	private void takePrevPhoto(){
-		NetManager.send("PREV_PHOTO", UserName);
+		int result = NetManager.send("PREV_PHOTO", UserName);
+		if(result==1){
+			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
+		}
+		else if(result==2){
+			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос", "Ошибка", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	
 	private void deleteFromServer(){
-		NetManager.send("DELETE_PHOTO", UserName);
+		int result = NetManager.send("DELETE_PHOTO", UserName);
+		if(result==1){
+			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
+		}
+		else if(result==2){
+			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос", "Ошибка", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 }

@@ -35,6 +35,7 @@ public class MenuFrame extends JFrame {
 	private JFileChooser fileChooser = null; 
 	private String UserName;
 	private JLabel figure;
+	private CryptClass crypter;
 	//данные для фотографии, отображаемой на экране
 	byte[] bytesFigure;
 	int bytesFigureSize;
@@ -46,6 +47,7 @@ public class MenuFrame extends JFrame {
 		final Toolkit kit = Toolkit.getDefaultToolkit();
 		setLocation((kit.getScreenSize().width - getWidth()) / 2, (kit.getScreenSize().height - getHeight()) / 2);
 		setMinimumSize(new Dimension(FRAME_MINIMUM_WIDTH, FRAME_MINIMUM_HEIGHT));
+		crypter = new CryptClass();
 		JMenuBar menuBar = new JMenuBar(); 
 		setJMenuBar(menuBar);
 		JMenu fileMenu = new JMenu("Файл");
@@ -59,7 +61,7 @@ public class MenuFrame extends JFrame {
 				if (fileChooser.showOpenDialog(MenuFrame.this) == JFileChooser.APPROVE_OPTION){
 					openFigure(fileChooser.getSelectedFile());
 				}
-			}};
+		}};
 		fileMenu.add(takePhotoAction);
 		Action savePhotoAction = new AbstractAction("Сохранить выбранную фотографию"){
 			public void actionPerformed(ActionEvent event){ 
@@ -70,19 +72,28 @@ public class MenuFrame extends JFrame {
 				if (fileChooser.showSaveDialog(MenuFrame.this) == JFileChooser.APPROVE_OPTION){
 					saveFigure(fileChooser.getSelectedFile());
 				}
-			}};
+		}};
 		fileMenu.add(savePhotoAction);
 		Action importToServerAction = new AbstractAction("Загрузить выбранную фотографию на сервер"){
 			public void actionPerformed(ActionEvent event){ 
 				sendToServer();
-			}};
+		}};
 		fileMenu.add(importToServerAction);
 		figure = new JLabel();
 		Action deleteFromServerAction = new AbstractAction("Удалить выбранную фотографию с сервера"){
 			public void actionPerformed(ActionEvent event){ 
 				deleteFromServer();
-			}};
+		}};
 		fileMenu.add(deleteFromServerAction);
+		if(UserName.equals("Admin")){
+			JMenu adminMenu = new JMenu("Администратор");
+			menuBar.add(adminMenu); 
+			Action closeServerAction = new AbstractAction("Выключить сервер"){
+				public void actionPerformed(ActionEvent event){ 
+					closeServer();
+			}};
+			adminMenu.add(closeServerAction);
+		}
 		Box hboxfigure = Box.createHorizontalBox();
 		hboxfigure.add(Box.createHorizontalGlue());
 		hboxfigure.add(figure);
@@ -162,12 +173,12 @@ public class MenuFrame extends JFrame {
 	
 	//Получение фотографии с сервера
 	private void receiveFigure(byte[] bytes, int bytesSize){
-		bytesFigure = bytes;
+		bytesFigure = crypter.encryptFile(bytes, bytesSize);
 		bytesFigureSize = bytesSize;
 		figure.setIcon(new ImageIcon(bytesFigure));
 	}
 	private void sendToServer(){
-		int result = NetManager.send("IMPORT_PHOTO", UserName, bytesFigure, bytesFigureSize);
+		int result = NetManager.send("IMPORT_PHOTO", UserName, crypter.cryptFile(bytesFigure, bytesFigureSize), bytesFigureSize);
 		if(result==1){
 			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
 		}
@@ -198,6 +209,16 @@ public class MenuFrame extends JFrame {
 	
 	private void deleteFromServer(){
 		int result = NetManager.send("DELETE_PHOTO", UserName);
+		if(result==1){
+			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
+		}
+		else if(result==2){
+			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос", "Ошибка", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	private void closeServer(){
+		int result = NetManager.send("CLOSE_SERVER", UserName);
 		if(result==1){
 			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
 		}

@@ -34,15 +34,17 @@ public class MenuFrame extends JFrame {
 	private NetClass NetManager;
 	private JFileChooser fileChooser = null; 
 	private String UserName;
+	private String UserPassword;
 	private JLabel figure;
 	private CryptClass crypter;
 	//данные для фотографии, отображаемой на экране
 	byte[] bytesFigure;
 	int bytesFigureSize;
 	
-	public MenuFrame(String name, NetClass NetManager){
+	public MenuFrame(String name, String password, NetClass NetManager){
 		super(FRAME_TITLE);
 		UserName = name;
+		UserPassword = password;
 		this.NetManager = NetManager;
 		final Toolkit kit = Toolkit.getDefaultToolkit();
 		setLocation((kit.getScreenSize().width - getWidth()) / 2, (kit.getScreenSize().height - getHeight()) / 2);
@@ -178,7 +180,7 @@ public class MenuFrame extends JFrame {
 		figure.setIcon(new ImageIcon(bytesFigure));
 	}
 	private void sendToServer(){
-		int result = NetManager.send("IMPORT_PHOTO", UserName, crypter.cryptFile(bytesFigure, bytesFigureSize), bytesFigureSize);
+		int result = NetManager.send("IMPORT_PHOTO", UserName, crypter.cryptFile(UserName, UserPassword), crypter.cryptFile(bytesFigure, bytesFigureSize), bytesFigureSize);
 		if(result==1){
 			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
 		}
@@ -188,7 +190,7 @@ public class MenuFrame extends JFrame {
 	}
 	
 	private void takeNextPhoto(){
-		int result = NetManager.send("NEXT_PHOTO", UserName);
+		int result = NetManager.send("NEXT_PHOTO", UserName, crypter.cryptFile(UserName, UserPassword));
 		if(result==1){
 			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
 		}
@@ -198,7 +200,7 @@ public class MenuFrame extends JFrame {
 	}
 	
 	private void takePrevPhoto(){
-		int result = NetManager.send("PREV_PHOTO", UserName);
+		int result = NetManager.send("PREV_PHOTO", UserName, crypter.cryptFile(UserName, UserPassword));
 		if(result==1){
 			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
 		}
@@ -208,7 +210,7 @@ public class MenuFrame extends JFrame {
 	}
 	
 	private void deleteFromServer(){
-		int result = NetManager.send("DELETE_PHOTO", UserName);
+		int result = NetManager.send("DELETE_PHOTO", UserName, crypter.cryptFile(UserName, UserPassword));
 		if(result==1){
 			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
 		}
@@ -218,7 +220,7 @@ public class MenuFrame extends JFrame {
 	}
 	
 	private void closeServer(){
-		int result = NetManager.send("CLOSE_SERVER", UserName);
+		int result = NetManager.send("CLOSE_SERVER", UserName, crypter.cryptFile(UserName, UserPassword));
 		if(result==1){
 			JOptionPane.showMessageDialog(MenuFrame.this,"Не удалось отправить запрос: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
 		}

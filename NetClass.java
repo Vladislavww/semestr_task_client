@@ -53,7 +53,7 @@ public class NetClass{
 	}
 	
 	
-	//функция для отправки логина и пароля
+	//функция для отправки логина и пароля и команд
 	public int send(String worktype, String login, String password){
 		try{
 			final Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
@@ -61,8 +61,10 @@ public class NetClass{
 			out.writeUTF(worktype);
 			out.writeUTF(login);
 			out.writeUTF(password);
-			Integer port = CLIENT_PORT;
-			out.writeUTF(port.toString());
+			if(worktype.equals("CHECK_IN")){
+				Integer port = CLIENT_PORT;
+				out.writeUTF(port.toString());
+			}
 			socket.close();
 			return 0;
 		}
@@ -77,12 +79,13 @@ public class NetClass{
 	}
 	
 	//функция для отправки фотографий
-	public int send(String worktype, String name, byte[] bytesFigure, int bytesFigureSize){
+	public int send(String worktype, String name, String password, byte[] bytesFigure, int bytesFigureSize){
 		try{
 			final Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
 			final DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 			out.writeUTF(worktype);
 			out.writeUTF(name);
+			out.writeUTF(password);
 			out.writeInt(bytesFigureSize);
 			for(int i=0; i<bytesFigureSize; i++){
 				out.writeByte(bytesFigure[i]);
@@ -102,7 +105,7 @@ public class NetClass{
 	
 	//для отправки запроса на просмотр следующей/предыдущей фотографии
 	//или удаления фотографии
-	public int send(String worktype, String name){
+	/*public int send(String worktype, String name){
 		try{
 			final Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
 			final DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -119,7 +122,7 @@ public class NetClass{
 			e.printStackTrace();
 			return 2;
 		}
-	}
+	}*/
 	
 	public void addMessageListener(MessageListener listener) {
 		synchronized (listeners){

@@ -27,12 +27,14 @@ public class LoginFrame extends JFrame{
 	private static final int FRAME_MINIMUM_WIDTH = 500;
 	private static final int FRAME_MINIMUM_HEIGHT = 500;
 	private NetClass NetManager = new NetClass();
+	private CryptClass crypter;
 	
 	public LoginFrame(){
 		super(FRAME_TITLE);
 		final Toolkit kit = Toolkit.getDefaultToolkit();
 		setLocation((kit.getScreenSize().width - getWidth()) / 2, (kit.getScreenSize().height - getHeight()) / 2);
 		setMinimumSize(new Dimension(FRAME_MINIMUM_WIDTH, FRAME_MINIMUM_HEIGHT));
+		crypter = new CryptClass();
 		JLabel UsernameLabel = new JLabel("Login:");
 		JLabel PasswordLabel = new JLabel("Password:");
 		JLabel NewUserLabel = new JLabel("Если вы новый пользователь");
@@ -118,7 +120,7 @@ public class LoginFrame extends JFrame{
 		String login = textFieldUsername.getText();
 		String password = textFieldPassword.getText();
 		if(NewUserFlag.isSelected() == false){
-			int result = NetManager.send("CHECK_IN", login, password);
+			int result = NetManager.send("CHECK_IN", login, crypter.cryptFile(login, password));
 			if(result==1){
 				JOptionPane.showMessageDialog(LoginFrame.this,"Не удалось отправить сообщение: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
 			}
@@ -127,7 +129,7 @@ public class LoginFrame extends JFrame{
 			}
 		}
 		else{
-			int result = NetManager.send("NEW_USER", login, password);
+			int result = NetManager.send("NEW_USER", login, crypter.cryptFile(login, password));
 			if(result==1){
 				JOptionPane.showMessageDialog(LoginFrame.this,"Не удалось отправить сообщение: узел-адресат не найден","Ошибка", JOptionPane.ERROR_MESSAGE);
 			}
@@ -142,7 +144,7 @@ public class LoginFrame extends JFrame{
 		ResultLabel.setVisible(true);
 		if(text.equals("true")){
 			ResultLabel.setText("Пароль правильный!");
-			final MenuFrame menu_frame = new MenuFrame(textFieldUsername.getText(), NetManager);
+			final MenuFrame menu_frame = new MenuFrame(textFieldUsername.getText(), textFieldPassword.getText(), NetManager);
 			menu_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			menu_frame.setVisible(true);
 			NetManager.removeMessageListener(new MessageListener(){ //убираю слушатель за ненадобностью
